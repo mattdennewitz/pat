@@ -1,0 +1,64 @@
+#!/usr/bin/env python
+
+import click
+
+from cssselect.xpath import ExpressionError as CSSExpressionError
+
+from lxml.etree import ParserError, XPathEvalError
+
+from pat import pat
+
+
+@click.command()
+@click.option('-x', '--xpath', 'xpath_query', help='Xpath query')
+@click.option('-c', '--css', 'css_query', help='CSS query')
+@click.option('-p', '--pretty', 'pretty_print', is_flag=True,
+              help='Pretty print?', default=True)
+@click.argument('input_fh', type=click.File('rb'))
+def main(xpath_query, css_query, pretty_print, input_fh):
+    """Queries file data using given XPath or CSS selector,
+    prints results.
+
+    One of `xpath_query` or `css_query` is required.
+
+    Args:
+        xpath_query: Valid XPath query
+        css_query: CSS selector path
+        pretty_print: Use lxml's pretty-printing.
+        input_fh: File handle on data to parsed, queried
+    """
+
+    if not xpath_query and not css_query:
+        raise click.BadParameter(
+            'Please specify a query via -x/--xpath or -c/--css options'
+        )
+
+    try:
+        # there's gold in the hills
+        data = input_fh.read()
+        results = pat(data, xpath_query, css_query)
+    except ParserError as exc:
+        # ran into trouble while reading the document
+        raise click.BadParameter('Could not parse document: {}'
+                                 .format(exc))
+    except XPathEvalError as exc:
+        # user provided a bad xpath
+        raise click.BadParameter('Xpath query <{}> invalid: {}'
+                                 .format(xpath_query, exc))
+    except CSSExpressionError as exc:
+        raise click.BadParameter('Could not parse CSS selector <{}>: {}'
+                                 .format(css_query, exc))
+
+    for i, node in enumerate(results):
+        # cast node tree to string
+        formatted = html.tostring(node)
+        formatted = formatted.decode('utf-8').strip()
+
+        # display formatted node
+        click.secho('# Node {}/{} '.format(i + 1, ttl), fg='cyan')
+        click.echo(formatted)
+        click.echo('')
+
+
+if __name__ == '__main__':
+    main()
