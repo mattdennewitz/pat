@@ -5,6 +5,14 @@ Test XPath and CSS queries against HTML at the CLI.
 This was banged out on a bumpy flight with shoddy internet access.
 More docs forthcoming.
 
+## Installation
+
+For now, install from this repo:
+
+```bash
+$ pip install -e git+git@github.com:mattdennewitz/pat.git#egg=pat
+```
+
 ## Usage
 
 XPath query via STDIN? Sure!
