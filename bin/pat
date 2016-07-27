@@ -4,6 +4,7 @@ import click
 
 from cssselect.xpath import ExpressionError as CSSExpressionError
 
+from lxml import html
 from lxml.etree import ParserError, XPathEvalError
 
 from pat import pat
@@ -48,6 +49,8 @@ def main(xpath_query, css_query, pretty_print, input_fh):
     except CSSExpressionError as exc:
         raise click.BadParameter('Could not parse CSS selector <{}>: {}'
                                  .format(css_query, exc))
+
+    ttl = len(results)
 
     for i, node in enumerate(results):
         # cast node tree to string
